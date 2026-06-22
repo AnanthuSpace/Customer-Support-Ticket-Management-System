@@ -40,25 +40,30 @@ export default function Sidebar() {
                 label: "All Tickets",
                 path: "/tickets",
             },
+            {
+                label: "Create Ticket",
+                path: "/create-ticket",
+            },
+            {
+                label: "Users",
+                path: "/users",
+            },
+            {
+                label: "Create Agent",
+                path: "/users/create",
+            },
         ],
     };
 
-    const items =
-        menus[user?.role || "customer"];
+    const items = menus[user?.role || "customer"];
 
     return (
         <aside className="w-64 min-h-screen bg-slate-900 text-white p-4">
-            <h2 className="text-xl font-bold mb-6">
-                Ticket System
-            </h2>
+            <h2 className="text-xl font-bold mb-6">Ticket System</h2>
 
             <nav className="flex flex-col gap-3">
                 {items.map((item) => (
-                    <Link
-                        key={item.path}
-                        to={item.path}
-                        className="hover:text-slate-300"
-                    >
+                    <Link key={item.path} to={item.path} className="hover:text-slate-300">
                         {item.label}
                     </Link>
                 ))}

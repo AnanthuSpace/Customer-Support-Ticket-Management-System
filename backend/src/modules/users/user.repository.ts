@@ -60,3 +60,9 @@ export const findAllUsers = async (options: UserQuery = {}) => {
         },
     };
 };
+
+export const findById = (id: string) =>
+    User.findById(id).select("-password");
+
+export const findByEmail = (email: string) =>
+    User.findOne({ email }).select("+password");

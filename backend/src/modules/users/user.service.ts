@@ -1,5 +1,35 @@
+import bcrypt from "bcrypt";
 import type { UserQuery } from "./user.repository.js";
 import * as repo from "./user.repository.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { generateUserId } from "../../utils/generateIds.js";
+
+export const createAgent = async (payload: {
+    name: string;
+    email: string;
+    password: string;
+}) => {
+    const existing = await repo.findByEmail(payload.email);
+    if (existing) {
+        throw new ApiError(409, "User with this email already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(payload.password, 10);
+
+    const agent = await repo.createUser({
+        userId: generateUserId(),
+        name: payload.name,
+        email: payload.email,
+        password: hashedPassword,
+        role: "agent",
+        isActive: true,
+    });
+
+    const agentObj = agent.toObject() as Record<string, unknown>;
+    delete agentObj["password"];
+
+    return agentObj;
+};
 
 export const listUsers = async (query: {
     search?: string;
@@ -22,4 +52,14 @@ export const listUsers = async (query: {
     };
 
     return repo.findAllUsers(options);
+};
+
+export const getUserById = async (id: string) => {
+    const user = await repo.findById(id);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return user;
 };

@@ -2,10 +2,19 @@ import { Router } from "express";
 import * as userController from "./user.controller.js";
 import { protect } from "../../middlewares/auth.middleware.js";
 import { authorize } from "../../middlewares/role.middleware.js";
+import { validate } from "../../middlewares/validate.middleware.js";
+import { createAgentSchema } from "./user.validation.js";
 
 const router = Router();
 
 router.use(protect);
+
+router.post(
+    "/",
+    authorize("admin"),
+    validate(createAgentSchema),
+    userController.createAgent
+);
 
 /**
  * @swagger
@@ -88,5 +97,6 @@ router.use(protect);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/", authorize("admin"), userController.listUsers);
+router.get("/:id", authorize("admin"), userController.getUserById);
 
 export default router;

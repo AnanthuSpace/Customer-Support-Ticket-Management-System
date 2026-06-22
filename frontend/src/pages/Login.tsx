@@ -1,8 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import toast from "react-hot-toast";
 
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
+import { loginSchema, type LoginFormData } from "@/schemas/auth.schema";
+import { loginUser } from "@/api/auth.api";
+import { useAuth } from "../context/AuthContext";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Card,
     CardContent,
@@ -11,42 +18,99 @@ import {
 } from "@/components/ui/card";
 
 export default function Login() {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+    });
+
+    const navigate = useNavigate();
+    const { login } = useAuth();
+
+    const onSubmit = async (data: LoginFormData) => {
+        try {
+            const response = await loginUser(data);
+
+            const {
+                data: {
+                    data: { user, accessToken },
+                },
+            } = response;
+
+            login(user, accessToken);
+            toast.success("Login successful");
+            navigate("/dashboard");
+        } catch (error: any) {
+            toast.error(
+                error.response?.data?.message ||
+                "Login failed"
+            );
+        }
+    };
+
     return (
-        <Card className="w-full max-w-md mx-auto shadow-lg">
+        <Card className="w-full max-w-md mx-auto">
             <CardHeader>
                 <CardTitle>Login</CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-4">
-                <div>
-                    <Label>Email</Label>
-                    <Input
-                        type="email"
-                        placeholder="john@example.com"
-                    />
-                </div>
+            <CardContent>
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="space-y-4"
+                >
+                    <div>
+                        <Label>Email</Label>
 
-                <div>
-                    <Label>Password</Label>
-                    <Input
-                        type="password"
-                        placeholder="********"
-                    />
-                </div>
+                        <Input
+                            {...register("email")}
+                            type="email"
+                        />
 
-                <Button className="w-full">
-                    Login
-                </Button>
+                        {errors.email && (
+                            <p className="text-red-500 text-sm">
+                                {errors.email.message}
+                            </p>
+                        )}
+                    </div>
 
-                <p className="text-center text-sm">
-                    Don't have an account?{" "}
-                    <Link
-                        to="/signup"
-                        className="text-blue-600"
+                    <div>
+                        <Label>Password</Label>
+
+                        <Input
+                            {...register("password")}
+                            type="password"
+                        />
+
+                        {errors.password && (
+                            <p className="text-red-500 text-sm">
+                                {errors.password.message}
+                            </p>
+                        )}
+                    </div>
+
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full"
                     >
-                        Sign Up
-                    </Link>
-                </p>
+                        {isSubmitting
+                            ? "Logging in..."
+                            : "Login"}
+                    </Button>
+
+                    <p className="text-center text-sm">
+                        Don't have an account?
+                        <Link
+                            to="/signup"
+                            className="text-blue-600 ml-1"
+                        >
+                            Sign Up
+                        </Link>
+                    </p>
+                </form>
             </CardContent>
         </Card>
     );
