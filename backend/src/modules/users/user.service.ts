@@ -8,6 +8,7 @@ export const createAgent = async (payload: {
     name: string;
     email: string;
     password: string;
+    role?: "agent" | "customer";
 }) => {
     const existing = await repo.findByEmail(payload.email);
     if (existing) {
@@ -21,7 +22,7 @@ export const createAgent = async (payload: {
         name: payload.name,
         email: payload.email,
         password: hashedPassword,
-        role: "agent",
+        role: payload.role === "customer" ? "customer" : "agent",
         isActive: true,
     });
 

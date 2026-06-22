@@ -15,6 +15,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   token: string | null;
+  isLoading: boolean;
   login: (user: User, token: string) => void;
   logout: () => void;
 };
@@ -36,6 +37,8 @@ export const AuthProvider = ({
     null
   );
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const storedUser =
       localStorage.getItem("user");
@@ -47,6 +50,8 @@ export const AuthProvider = ({
       setUser(JSON.parse(storedUser));
       setToken(storedToken);
     }
+
+    setIsLoading(false);
   }, []);
 
   const login = (
@@ -80,6 +85,7 @@ export const AuthProvider = ({
       value={{
         user,
         token,
+        isLoading,
         login,
         logout,
       }}

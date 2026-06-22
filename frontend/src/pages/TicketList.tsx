@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
+import { Eye, Trash2 } from "lucide-react";
 
 import { listTickets } from "@/api/ticket.api";
 import { Button } from "@/components/ui/button";
@@ -145,9 +146,13 @@ export default function TicketList() {
                     <td className="px-4 py-3">{ticket.createdBy?.name || "-"}</td>
                     <td className="px-4 py-3">{ticket.assignedTo?.name || "Unassigned"}</td>
                     <td className="px-4 py-3">
-                      <Link to={`/tickets/${ticket._id}`} className="text-blue-600 hover:underline">
-                        View
-                      </Link>
+                        <Link
+                          to={`/tickets/${ticket._id}`}
+                          className="inline-flex items-center gap-2 text-blue-600 hover:underline"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </Link>
                     </td>
                   </tr>
                 ))}

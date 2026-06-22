@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { createAgent } from "@/api/user.api";
@@ -14,6 +14,7 @@ const createAgentSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.enum(["agent", "customer"]).default("agent"),
 });
 
 type CreateAgentFormData = z.infer<typeof createAgentSchema>;
@@ -30,12 +31,23 @@ export default function CreateAgent() {
   const navigate = useNavigate();
 
   const onSubmit = async (data: CreateAgentFormData) => {
+    console.log("CreateAgent submit", data);
     try {
-      await createAgent(data);
+      const response = await createAgent(data);
+      console.log("createAgent response", response);
       toast.success("Agent created successfully");
       navigate("/users");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to create agent");
+      console.error("createAgent error", error?.response || error);
+      const serverMessage = error?.response?.data?.message;
+      const validationErrors = error?.response?.data?.errors;
+
+      if (validationErrors && Array.isArray(validationErrors)) {
+        validationErrors.forEach((e: any) => toast.error(e.message || JSON.stringify(e)));
+        return;
+      }
+
+      toast.error(serverMessage || "Failed to create agent");
     }
   };
 
@@ -71,8 +83,19 @@ export default function CreateAgent() {
             )}
           </div>
 
+          <div>
+            <Label>Role</Label>
+            <select
+              {...register("role")}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-slate-400 focus:outline-none"
+            >
+              <option value="agent">Agent</option>
+              <option value="customer">Customer</option>
+            </select>
+          </div>
+
           <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Creating..." : "Create Agent"}
+            {isSubmitting ? "Creating..." : "Create User"}
           </Button>
         </form>
       </CardContent>

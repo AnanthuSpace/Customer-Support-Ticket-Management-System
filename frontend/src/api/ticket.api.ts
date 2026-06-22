@@ -22,3 +22,5 @@ export const getTicketById = (id: string) => api.get(`/tickets/${id}`);
 
 export const updateTicketStatus = (id: string, status: string) =>
   api.put(`/tickets/${id}`, { status });
+
+export const deleteTicket = (id: string) => api.delete(`/tickets/${id}`);

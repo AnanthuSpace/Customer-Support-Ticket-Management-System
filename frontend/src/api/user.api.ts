@@ -16,4 +16,5 @@ export const createAgent = (payload: {
   name: string;
   email: string;
   password: string;
+  role?: "agent" | "customer";
 }) => api.post("/users", payload);

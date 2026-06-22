@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
-import { getTicketById, updateTicketStatus } from "@/api/ticket.api";
+import { getTicketById, updateTicketStatus, deleteTicket } from "@/api/ticket.api";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -72,6 +72,17 @@ export default function TicketDetails() {
     return <p>Ticket not found.</p>;
   }
 
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      await deleteTicket(id);
+      toast.success("Ticket deleted successfully");
+      navigate("/tickets");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to delete ticket");
+    }
+  };
+
   const canUpdateStatus = user?.role === "admin" || user?.role === "agent";
 
   return (
@@ -132,6 +143,14 @@ export default function TicketDetails() {
             </select>
             <Button onClick={handleStatusUpdate} disabled={updating}>
               {updating ? "Updating..." : "Update Status"}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={updating}
+              className="w-full"
+            >
+              Delete Ticket
             </Button>
           </div>
         )}

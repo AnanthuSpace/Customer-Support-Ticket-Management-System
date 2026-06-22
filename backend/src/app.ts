@@ -5,6 +5,7 @@ import { swaggerDocs } from "./config/swagger.js";
 import authRouter from "./modules/auth/auth.routes.js";
 import ticketRouter from "./modules/tickets/ticket.routes.js";
 import userRouter from "./modules/users/user.routes.js";
+import dashboardRouter from "./modules/dashboard/dashboard.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/tickets", ticketRouter);
 app.use("/api/users", userRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 // Global error handler — must be registered last
 app.use(errorHandler as any);

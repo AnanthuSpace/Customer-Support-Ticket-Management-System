@@ -6,10 +6,14 @@ export default function ProtectedRoute({
 }: {
     children: React.ReactNode;
 }) {
-    const { token } = useAuth();
+    const { token, isLoading } = useAuth();
+
+    if (isLoading) {
+        return null;
+    }
 
     if (!token) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/login" replace />;
     }
 
     return children;

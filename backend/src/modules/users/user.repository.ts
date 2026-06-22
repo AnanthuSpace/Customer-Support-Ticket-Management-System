@@ -66,3 +66,7 @@ export const findById = (id: string) =>
 
 export const findByEmail = (email: string) =>
     User.findOne({ email }).select("+password");
+
+export const createUser = (payload: any) => {
+    return User.create(payload);
+};

@@ -58,23 +58,28 @@ export default function Sidebar() {
     const items = menus[user?.role || "customer"];
 
     return (
-        <aside className="w-64 min-h-screen bg-slate-900 text-white p-4">
-            <h2 className="text-xl font-bold mb-6">Ticket System</h2>
+        <>
+            <aside className="w-64 min-h-screen bg-slate-900 text-white p-4">
+                <div>
+                    <h2 className="text-xl font-bold mb-6">Ticket System</h2>
 
-            <nav className="flex flex-col gap-3">
-                {items.map((item) => (
-                    <Link key={item.path} to={item.path} className="hover:text-slate-300">
-                        {item.label}
-                    </Link>
-                ))}
-            </nav>
+                    <nav className="flex flex-col gap-3">
+                        {items.map((item) => (
+                            <Link key={item.path} to={item.path} className="hover:text-slate-300">
+                                {item.label}
+                            </Link>
+                        ))}
+                    </nav>
+                </div>
+            </aside>
 
             <button
                 onClick={logout}
-                className="mt-10 bg-red-500 px-4 py-2 rounded"
+                aria-label="Logout"
+                className="fixed left-4 bottom-4 z-50 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
             >
                 Logout
             </button>
-        </aside>
+        </>
     );
 }
