@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 import { getTicketById, updateTicketStatus, deleteTicket } from "@/api/ticket.api";
 import { useAuth } from "@/context/AuthContext";
@@ -23,6 +24,7 @@ export default function TicketDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const fetchTicket = async () => {
     if (!id) return;
@@ -80,6 +82,8 @@ export default function TicketDetails() {
       navigate("/tickets");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to delete ticket");
+    } finally {
+      setConfirmOpen(false);
     }
   };
 
@@ -146,7 +150,7 @@ export default function TicketDetails() {
             </Button>
             <Button
               variant="destructive"
-              onClick={handleDelete}
+                onClick={() => setConfirmOpen(true)}
               disabled={updating}
               className="w-full"
             >
@@ -155,6 +159,16 @@ export default function TicketDetails() {
           </div>
         )}
       </div>
+
+        <ConfirmModal
+          open={confirmOpen}
+          title="Delete ticket"
+          message="Are you sure you want to delete this ticket? This action cannot be undone."
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmOpen(false)}
+        />
     </div>
   );
 }

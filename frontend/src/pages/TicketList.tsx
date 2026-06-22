@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, Trash2 } from "lucide-react";
 
-import { listTickets } from "@/api/ticket.api";
+import { listTickets, deleteTicket } from "@/api/ticket.api";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,8 @@ export default function TicketList() {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<any>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toDeleteId, setToDeleteId] = useState<string | null>(null);
 
   const fetchTickets = async (
     searchQuery = "",
@@ -146,13 +149,27 @@ export default function TicketList() {
                     <td className="px-4 py-3">{ticket.createdBy?.name || "-"}</td>
                     <td className="px-4 py-3">{ticket.assignedTo?.name || "Unassigned"}</td>
                     <td className="px-4 py-3">
-                        <Link
-                          to={`/tickets/${ticket._id}`}
-                          className="inline-flex items-center gap-2 text-blue-600 hover:underline"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View
-                        </Link>
+                        <div className="flex items-center gap-3">
+                          <Link
+                            to={`/tickets/${ticket._id}`}
+                            className="inline-flex items-center gap-2 text-blue-600 hover:underline"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View
+                          </Link>
+
+                          <button
+                            onClick={() => {
+                              setToDeleteId(ticket._id);
+                              setConfirmOpen(true);
+                            }}
+                            className="inline-flex items-center gap-2 text-red-600 hover:underline"
+                            aria-label={`Delete ticket ${ticket.title}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </button>
+                        </div>
                     </td>
                   </tr>
                 ))}
@@ -187,6 +204,31 @@ export default function TicketList() {
               </div>
             </div>
           )}
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Delete ticket"
+        message="Are you sure you want to delete this ticket? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={async () => {
+          if (!toDeleteId) return;
+          try {
+            await deleteTicket(toDeleteId);
+            toast.success("Ticket deleted");
+            setToDeleteId(null);
+            await fetchTickets(search, status, page);
+          } catch (err: any) {
+            toast.error(err.response?.data?.message || "Failed to delete ticket");
+          } finally {
+            setConfirmOpen(false);
+          }
+        }}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setToDeleteId(null);
+        }}
+      />
         </>
       )}
     </div>
