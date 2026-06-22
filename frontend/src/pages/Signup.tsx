@@ -50,7 +50,14 @@ export default function Signup() {
                 },
             } = loginResponse;
 
-            login(user, accessToken);
+            const normalizedUser = {
+                id: user._id ?? user.id ?? user.userId,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            };
+
+            login(normalizedUser, accessToken);
             toast.success("Account created successfully");
             navigate("/dashboard");
         } catch (error: any) {

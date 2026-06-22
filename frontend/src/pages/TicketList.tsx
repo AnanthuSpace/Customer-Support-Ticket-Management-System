@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Eye, Trash2 } from "lucide-react";
 
 import { listTickets, deleteTicket } from "@/api/ticket.api";
+import { useAuth } from "@/context/AuthContext";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ export default function TicketList() {
   const [pagination, setPagination] = useState<any>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toDeleteId, setToDeleteId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const fetchTickets = async (
     searchQuery = "",
@@ -82,6 +84,12 @@ export default function TicketList() {
         <div>
           <h1 className="text-2xl font-semibold">Tickets</h1>
           <p className="text-sm text-slate-600">Search, filter, and review support tickets.</p>
+          {user?.role === "agent" && (
+            <p className="text-xs text-slate-500 mt-1">Showing tickets assigned to you.</p>
+          )}
+          {user?.role === "customer" && (
+            <p className="text-xs text-slate-500 mt-1">Showing tickets you created.</p>
+          )}
         </div>
 
         <Link to="/create-ticket">

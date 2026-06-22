@@ -45,6 +45,11 @@ const ticketSchema = new Schema(
             ref: "User",
             default: null,
         },
+        personalNote: {
+            type: String,
+            trim: true,
+            default: "",
+        },
     },
     {
         timestamps: true,

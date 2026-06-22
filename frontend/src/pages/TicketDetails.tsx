@@ -3,7 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
-import { getTicketById, updateTicketStatus, deleteTicket } from "@/api/ticket.api";
+import { getTicketById, updateTicketStatus, updateTicketNote, updateTicketAssignment, deleteTicket } from "@/api/ticket.api";
+import { listAgents } from "@/api/user.api";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +25,11 @@ export default function TicketDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [note, setNote] = useState<string>("");
+  const [savingNote, setSavingNote] = useState(false);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [assignedAgentId, setAssignedAgentId] = useState<string>("");
+  const [savingAssignment, setSavingAssignment] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const fetchTicket = async () => {
@@ -35,6 +41,8 @@ export default function TicketDetails() {
       const ticketData = response.data?.data;
       setTicket(ticketData);
       setStatus(ticketData?.status || "");
+      setNote(ticketData?.personalNote || "");
+      setAssignedAgentId(ticketData?.assignedTo?._id || "");
     } catch (err: any) {
       const message = err.response?.data?.message || "Could not load ticket";
       setError(message);
@@ -48,6 +56,21 @@ export default function TicketDetails() {
     fetchTicket();
   }, [id]);
 
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const response = await listAgents({ limit: 100 });
+        setAgents(response.data?.data?.users || []);
+      } catch (err) {
+        console.error("Failed to load agents", err);
+      }
+    };
+
+    if (user?.role === "admin") {
+      fetchAgents();
+    }
+  }, [user?.role]);
+
   const handleStatusUpdate = async () => {
     if (!id || !status) return;
     setUpdating(true);
@@ -59,6 +82,34 @@ export default function TicketDetails() {
       toast.error(err.response?.data?.message || "Failed to update status");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleSaveNote = async () => {
+    if (!id) return;
+    setSavingNote(true);
+    try {
+      const response = await updateTicketNote(id, note);
+      setTicket(response.data.data);
+      toast.success("Personal note saved");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to save note");
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  const handleSaveAssignment = async () => {
+    if (!id) return;
+    setSavingAssignment(true);
+    try {
+      const response = await updateTicketAssignment(id, assignedAgentId);
+      setTicket(response.data.data);
+      toast.success("Ticket assigned successfully");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to assign ticket");
+    } finally {
+      setSavingAssignment(false);
     }
   };
 
@@ -88,6 +139,7 @@ export default function TicketDetails() {
   };
 
   const canUpdateStatus = user?.role === "admin" || user?.role === "agent";
+  const canViewNote = user?.role === "admin" || user?.role === "agent";
 
   return (
     <div className="space-y-6">
@@ -129,6 +181,51 @@ export default function TicketDetails() {
               <p className="mt-2 text-base font-medium">{new Date(ticket.createdAt).toLocaleString()}</p>
             </div>
           </div>
+
+          {user?.role === "admin" && (
+            <div className="rounded-lg bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Assign to Agent</p>
+              <select
+                value={assignedAgentId}
+                onChange={(event) => setAssignedAgentId(event.target.value)}
+                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-slate-400 focus:outline-none"
+              >
+                <option value="">Unassigned</option>
+                {agents.map((agent) => (
+                  <option key={agent._id} value={agent._id}>
+                    {agent.name} ({agent.email})
+                  </option>
+                ))}
+              </select>
+              <Button
+                onClick={handleSaveAssignment}
+                disabled={savingAssignment || !assignedAgentId}
+                className="mt-3"
+              >
+                {savingAssignment ? "Saving..." : "Assign Ticket"}
+              </Button>
+            </div>
+          )}
+
+          {(user?.role === "admin" || user?.role === "agent") && (
+            <div className="rounded-lg bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Personal Note</p>
+              <textarea
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                rows={6}
+                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-slate-400 focus:outline-none"
+                placeholder="Add a private note for agents and admins only"
+              />
+              <Button
+                onClick={handleSaveNote}
+                disabled={savingNote}
+                className="mt-3"
+              >
+                {savingNote ? "Saving..." : "Save Note"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {canUpdateStatus && (

@@ -29,6 +29,20 @@ export const listUsers = async (
     }
 };
 
+export const listAgents = async (
+    req: any,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const result = await userService.listAgents(req.query as any);
+
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const getUserById = async (
     req: any,
     res: Response,

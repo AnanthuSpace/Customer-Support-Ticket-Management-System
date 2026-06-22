@@ -96,6 +96,7 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+router.get("/agents", authorize("admin"), userController.listAgents);
 router.get("/", authorize("admin"), userController.listUsers);
 router.get("/:id", authorize("admin"), userController.getUserById);
 

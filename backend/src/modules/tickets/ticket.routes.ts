@@ -6,6 +6,8 @@ import { validate } from "../../middlewares/validate.middleware.js";
 import {
     createTicketSchema,
     updateStatusSchema,
+    updateNoteSchema,
+    updateAssignmentSchema,
 } from "./ticket.validation.js";
 
 const router = Router();
@@ -44,6 +46,20 @@ router.put(
     authorize("agent", "admin"),
     validate(updateStatusSchema),
     ticketController.updateTicketStatus
+);
+
+router.put(
+    "/:id/note",
+    authorize("agent", "admin"),
+    validate(updateNoteSchema),
+    ticketController.updateTicketNote
+);
+
+router.put(
+    "/:id/assign",
+    authorize("admin"),
+    validate(updateAssignmentSchema),
+    ticketController.updateTicketAssignment
 );
 
 /**

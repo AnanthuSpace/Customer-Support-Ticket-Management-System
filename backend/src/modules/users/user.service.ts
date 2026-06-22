@@ -55,6 +55,26 @@ export const listUsers = async (query: {
     return repo.findAllUsers(options);
 };
 
+export const listAgents = async (query: {
+    search?: string;
+    page?: string;
+    limit?: string;
+}) => {
+    const page = query.page ? Math.max(1, Number(query.page)) : 1;
+    const limit = query.limit
+        ? Math.min(100, Math.max(1, Number(query.limit)))
+        : 10;
+
+    const options: UserQuery = {
+        search: query.search,
+        role: "agent",
+        page,
+        limit,
+    };
+
+    return repo.findAllUsers(options);
+};
+
 export const getUserById = async (id: string) => {
     const user = await repo.findById(id);
 

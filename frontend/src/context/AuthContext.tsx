@@ -47,7 +47,11 @@ export const AuthProvider = ({
       localStorage.getItem("token");
 
     if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
+      const parsed = JSON.parse(storedUser);
+      if (!parsed.id) {
+        parsed.id = parsed._id || parsed.userId || undefined;
+      }
+      setUser(parsed as User);
       setToken(storedToken);
     }
 

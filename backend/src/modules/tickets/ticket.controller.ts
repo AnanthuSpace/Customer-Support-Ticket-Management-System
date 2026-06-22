@@ -78,6 +78,40 @@ export const updateTicketStatus = async (
     }
 };
 
+export const updateTicketNote = async (
+    req: any,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const ticket = await ticketService.updateNote(
+            req.params.id as string,
+            req.body.note as string
+        );
+
+        res.status(200).json({ success: true, data: ticket });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateTicketAssignment = async (
+    req: any,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const ticket = await ticketService.updateTicketAssignment(
+            req.params.id as string,
+            req.body.assignedTo as string
+        );
+
+        res.status(200).json({ success: true, data: ticket });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const deleteTicket = async (
     req: any,
     res: Response,

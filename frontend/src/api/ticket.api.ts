@@ -23,4 +23,10 @@ export const getTicketById = (id: string) => api.get(`/tickets/${id}`);
 export const updateTicketStatus = (id: string, status: string) =>
   api.put(`/tickets/${id}`, { status });
 
+export const updateTicketNote = (id: string, note: string) =>
+  api.put(`/tickets/${id}/note`, { note });
+
+export const updateTicketAssignment = (id: string, assignedTo: string) =>
+  api.put(`/tickets/${id}/assign`, { assignedTo });
+
 export const deleteTicket = (id: string) => api.delete(`/tickets/${id}`);

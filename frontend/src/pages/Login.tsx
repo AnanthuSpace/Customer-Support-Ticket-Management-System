@@ -39,7 +39,14 @@ export default function Login() {
                 },
             } = response;
 
-            login(user, accessToken);
+            const normalizedUser = {
+                id: user._id ?? user.id ?? user.userId,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            };
+
+            login(normalizedUser, accessToken);
             toast.success("Login successful");
             navigate("/dashboard");
         } catch (error: any) {

@@ -12,6 +12,8 @@ export const listUsers = (query?: UserListQuery) =>
   api.get("/users", { params: query });
 
 export const getUserById = (id: string) => api.get(`/users/${id}`);
+export const listAgents = (query?: UserListQuery) =>
+  api.get("/users/agents", { params: query });
 export const createAgent = (payload: {
   name: string;
   email: string;

@@ -8,6 +8,7 @@ export interface TicketQuery {
     status?: string;
     page?: number;
     limit?: number;
+    includeNote?: boolean;
 }
 
 export const createTicket = (payload: Record<string, unknown>) =>
@@ -20,6 +21,7 @@ export const findAll = async (options: TicketQuery = {}) => {
         status,
         page = 1,
         limit = 10,
+        includeNote = false,
     } = options;
 
     // Start from the base filter (e.g. { createdBy } for customers)
@@ -40,13 +42,19 @@ export const findAll = async (options: TicketQuery = {}) => {
 
     const skip = (page - 1) * limit;
 
-    const [tickets, total] = await Promise.all([
-        Ticket.find(query)
+    const ticketQuery = Ticket.find(query)
             .populate("createdBy", POPULATE_USER)
             .populate("assignedTo", POPULATE_USER)
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit),
+            .limit(limit);
+
+    if (!includeNote) {
+        ticketQuery.select("-personalNote");
+    }
+
+    const [tickets, total] = await Promise.all([
+        ticketQuery,
         Ticket.countDocuments(query),
     ]);
 
@@ -63,10 +71,17 @@ export const findAll = async (options: TicketQuery = {}) => {
     };
 };
 
-export const findById = (id: string) =>
-    Ticket.findById(id)
+export const findById = (id: string, includeNote = false) => {
+    const query = Ticket.findById(id)
         .populate("createdBy", POPULATE_USER)
         .populate("assignedTo", POPULATE_USER);
+
+    if (!includeNote) {
+        query.select("-personalNote");
+    }
+
+    return query;
+};
 
 export const updateById = (id: string, update: Record<string, unknown>) =>
     Ticket.findByIdAndUpdate(id, update, { new: true })
